@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Season One: Big Fuckin Fella</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+
+<!-- partial:index.partial.html -->
+<canvas id=a></canvas>
+<script id=fragmentShader type=x-shader/x-fragment>
+precision mediump float;
+#define ITERS 18
+uniform float time;
+uniform vec2 resolution;
+
+vec3 lighten(vec3 c, float d) {
+	return vec3(min(1.0, c.r + d), min(1.0, c.g + d), min(1.0, c.b + d));
+}
+
+vec3 pastel(vec3 c) {
+	float avg = (c.r+c.g+c.b)/3.0;
+	return lighten(c, avg);
+}
+
+vec2 R(vec2 p,float a) {
+	return vec2( p.x*cos(a) + p.y*sin(a), 
+			    -p.x*sin(a) + p.y*cos(a));
+}
+
+float julia(vec2 c,vec2 c1, float max){
+	float xx = c.x * c.x;
+	float yy = c.y * c.y;
+	float xy = c.x * c.y;
+	float s = xx + yy;
+	for (int i = ITERS;i>0;i--){
+		c=vec2(xx - yy, xy + xy) + c1;
+		xx = c.x * c.x;
+		yy = c.y * c.y;
+		xy = c.x * c.y;
+		s = xx + yy;
+		if(s>=max || i == 1)return float(ITERS - i)/float(ITERS);
+	}
+	return 0.0;
+}
+
+
+void main() {
+	
+	vec2 c0 = (gl_FragCoord.xy / resolution) - vec2(0.5,0.5);	
+	vec2 c  = R(c0, time) + vec2(cos(time*2.0)*0.4,sin(time)*0.6);
+	float j = julia(c,c, 16.0);
+	float r = j * sin(time + c0.y*2000.0*sin(time))*cos((c.x+c.y)*time*2.0)*sin(c0.y*sin(time)*3.0);
+	float g = j * cos(time + c0.y*3000.0*cos(time))*sin(c.x*time*6.0+cos(c.x+c.y)*time*333.0);
+	float b = (r + g + sin(time*6.0)*c0.y)/2.0;
+	gl_FragColor = vec4(pastel(vec3(r, g, b)), 1.0);
+}
+</script>
+<script id=vertexShader type=x-shader/x-vertex>
+attribute vec3 pos;
+
+void main() {
+	gl_Position=vec4(pos, 1.0);
+}
+</script>
+
+<div id="particles-js"></div>
+<div class="text">
+	<h1>Season One</h1>
+	<p>Big Fuckin Fella</p>
+</div>
+<!-- partial -->
+  <script src='https://terabaud.github.io/hello-webgl/minigl.js'></script><script  src="./script.js"></script>
+  <script src='https://cldup.com/S6Ptkwu_qA.js'></script><script  src="./script.js"></script>
+</body>
+</html>
